@@ -65,7 +65,7 @@ nav .topnav ul a{
 
 /* main */
 main{
-    width: 1207px;
+    width: 100%;
     height: auto;
     margin: 0 auto;
     padding-top: 30px;
@@ -76,6 +76,7 @@ main{
     height: 222px;
     margin: 150px 0;
     display: flex;
+    margin: 0 auto;
     justify-content: center;
 }
 
