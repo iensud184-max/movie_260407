@@ -6,5 +6,5 @@ bp = Blueprint('main', __name__, url_prefix='/')
 
 @bp.route('/')
 def index():
-    form = UserCreateForm()
-    return render_template('signup.html', form=form)
+    return render_template('customerservice/question_list.html')
+
