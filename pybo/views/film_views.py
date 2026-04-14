@@ -9,3 +9,7 @@ def event():
 @bp.route('/store', methods=['GET'])
 def store():
     return render_template('store.html')
+
+@bp.route('/store/ticket', methods=['GET'])
+def store_ticket():
+    return render_template('store_ticket.html')
