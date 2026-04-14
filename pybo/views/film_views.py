@@ -4,8 +4,9 @@ bp = Blueprint('film', __name__, url_prefix='/film')
 
 @bp.route('/event', methods=['GET'])
 def event():
-    return render_template('event.html')
+    return render_template('movie_info.html')
+    # return render_template('event.html')
 
 @bp.route('/store', methods=['GET'])
 def store():
-    return render_template('store.html')
+    return render_template('store.html') 
