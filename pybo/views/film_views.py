@@ -10,9 +10,21 @@ def event():
 def store():
     return render_template('store.html')
 
-@bp.route('/store/ticket', methods=['GET'])
-def store_ticket():
-    return render_template('store_ticket.html')
+@bp.route('/store/redticket', methods=['GET'])
+def store_redticket():
+    return render_template('store_redticket.html')
+
+@bp.route('/store/vipticket', methods=['GET'])
+def store_vipticket():
+    return render_template('store_vipticket.html')
+
+@bp.route('/store/bestcombo', methods=['GET'])
+def store_bestcombo():
+    return render_template('store_bestcombo.html')
+
+@bp.route('/store/pay', methods=['GET'])
+def store_pay():
+    return render_template('store_pay.html')
 
 @bp.route('/movie/list', methods=['GET'])
 def movie_list():
@@ -25,3 +37,4 @@ def movie_info(movie_id):
 @bp.route('/booking', methods=['GET','POST'])
 def booking():
     return render_template('booking.html')
+
