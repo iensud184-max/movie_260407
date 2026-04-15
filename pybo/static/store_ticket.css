@@ -166,7 +166,7 @@
 }
 
 /* 버튼 공통 */
-.present_buy button {
+ .present_buy button {
     flex: 1;
     height: 50px;
     border-radius: 4px;
@@ -182,10 +182,18 @@
 }
 
 /* 구매 */
-.buy {
+.present_buy a {
+    flex: 1;
+    height: 50px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
     background: red;
     color: #fff;
     border: 1px solid red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* =========================

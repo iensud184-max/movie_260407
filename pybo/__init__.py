@@ -33,8 +33,6 @@ def create_app():
     app.register_blueprint(main_views.bp)
     app.register_blueprint(auth_views.bp)
     app.register_blueprint(film_views.bp)
-    # app.register_blueprint(question_views.bp)
-    #app.register_blueprint(question_list.bp)
     app.register_blueprint(cs_views.bp)
 
     return app

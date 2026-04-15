@@ -28,7 +28,7 @@ fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}&language
       : "정보 없음";
 
     const cast = credits.cast
-      ? credits.cast.slice(0, 5).map(actor => actor.name).join(", ")
+      ? credits.cast.slice(0, 4).map(actor => actor.name).join(", ")
       : "정보 없음";
 
     detail.innerHTML = `
