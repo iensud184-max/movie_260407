@@ -1,0 +1,107 @@
+@charset "utf-8";
+
+#storepage {
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+/* 배너 */
+.inner_banner {
+    background-color: black;
+    width: 100%;    
+}
+
+.inner_banner .banner_in {    
+    display: flex;
+    justify-content: center;
+}
+
+/* 상단 메뉴 */
+.middle-bar {
+    display: flex;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #fff;
+}
+
+.navi-bar {    
+    padding-left: 0;
+    margin: 0;
+    display: flex;    
+}
+
+.navi-bar li {
+    width: 400px;
+    height: 60px;
+    line-height: 60px;
+    border: 1px solid #eee;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.navi-bar li a {
+    color: #000;
+    text-decoration: none;
+}
+
+.navi-bar li.active {
+    border-bottom: 3px solid #000;
+}
+
+/* 전체 상품 영역 */
+.store_pro {
+    width: 1207px;
+    margin: 0 auto;
+    padding-top: 30px;
+}
+
+.store_pro h3 {
+    margin-top: 10px;
+    padding: 20px 15px;
+    font-size: 16px;
+}
+
+.store_pro a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.store_pro h4 {
+    font-size: 17px;
+    text-align: center;
+}
+
+.store_pro p {
+    font-size: 11px;
+    text-align: center;
+}
+
+.store_pro span {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.store_pro em {
+    font-style: normal;
+    font-size: 16px;
+    color: gray;
+}
+
+/* 핵심: 3열 그리드 */
+.ticket,
+.snack_drink,
+.titan_merch {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+/* 이미지 */
+.store_pro img {
+    width: 100%;
+    max-width: 300px;
+}

@@ -31,7 +31,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     Terms_of_Service = db.Column(db.Boolean, nullable=False)
     Privacy_Policy = db.Column(db.Boolean, nullable=False)
-    receive_emails = db.Column(db.Boolean, nullable=True, default=False)
+    receive_emails = db.Column(db.Boolean, nullable=True, default='False')
 
 
 # 공지사항 - FAQ
@@ -56,6 +56,30 @@ class Product(db.Model):
     Productlimit = db.Column(db.Integer, nullable=False)
     Productdate = db.Column(db.String(120), nullable=False)
 
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_name = db.Column(db.String)
+    user_userid = db.Column(db.String)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    product_name = db.Column(db.String)
+    quantity = db.Column(db.Integer)
+    total_price = db.Column(db.Integer)
+    status = db.Column(db.String(20), default="READY")  # READY / SUCCESS / FAIL
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+    product = db.relationship('Product')
+    user = db.relationship('User')
+
+class Payment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
+    payment_key = db.Column(db.String(200))
+    status = db.Column(db.String(20))  # SUCCESS / FAIL
+    paid_at = db.Column(db.DateTime)
+
+    order = db.relationship('Order')
+
 # 영화
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -70,6 +94,7 @@ class Movie(db.Model):
     actors = db.Column(db.String(300))
 
     schedules = db.relationship('Schedule', back_populates='movie', cascade='all, delete-orphan')
+
 
 # 지역/지점
 class Region(db.Model):
@@ -108,7 +133,6 @@ class Screen(db.Model):
     def __repr__(self):
         return f'<Screen {self.theater.name} {self.name}>'
 
-
 class Schedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
@@ -127,7 +151,6 @@ class Schedule(db.Model):
 
     def __repr__(self):
         return f'<Schedule {self.movie.title} {self.screen.name} {self.start_time}>'
-
 
 class Seat(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -148,20 +171,6 @@ class Reservation(db.Model):
     screening_id = db.Column(db.Integer)
     seat_id = db.Column(db.Integer)
 
-# 1대1 문의 - review __공지사항
-class Privacy(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(100), nullable=False)
-    info = db.Column(db.String(200), nullable=False)
-    content = db.Column(db.Text(), nullable=False)
-    create_date = db.Column(db.DateTime(), nullable=False)
-    # user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    # user = db.relationship('User', backref=db.backref('answer_set'))
-    # modify_date = db.Column(db.DateTime(), nullable=True)
-
-
-
-    # 이게 뭐임(확인 필요)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     schedule_id = db.Column(db.Integer, db.ForeignKey('schedule.id'), nullable=False)
     seat_id = db.Column(db.Integer, db.ForeignKey('seat.id'), nullable=False)
@@ -173,3 +182,15 @@ class Privacy(db.Model):
 
     def __repr__(self):
         return f'<Reservation {self.user_id} {self.schedule_id}>'
+
+# 1대1 문의 - review __공자사항
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(100), nullable=False)
+    info = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text(), nullable=False)
+    image_path = db.Column(db.Text(), nullable=True)
+    create_date = db.Column(db.DateTime(), nullable=False)
+    # user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    # user = db.relationship('User', backref=db.backref('answer_set'))
+    # modify_date = db.Column(db.DateTime(), nullable=True)

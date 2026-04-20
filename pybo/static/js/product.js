@@ -4,8 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const numBox = document.querySelector(".basic_num");
     const priceBox = document.querySelector(".end_price");
 
-    const price = 9900;
-    const maxCount = 3;
+    const price = productprice;
+    const maxCount = Productlimit;
     const minCount = 1;
 
     // 초기 상태 설정
@@ -64,4 +64,14 @@ tabMenu.forEach((tm, i) => {
     tabContent[i].style.display = 'block';
 
   });
-}); 
+});
+
+document.getElementById("buy-btn").addEventListener("click", function () {
+    const count = document.querySelector(".basic_num").textContent;
+
+    console.log("현재 수량:", count);  // 🔥 추가
+
+    const productId = this.dataset.productId;
+
+    window.location.href = `/store/order/create/${productId}?quantity=${count}`;
+});
