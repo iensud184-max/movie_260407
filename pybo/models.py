@@ -32,6 +32,8 @@ class User(db.Model):
     Terms_of_Service = db.Column(db.Boolean, nullable=False)
     Privacy_Policy = db.Column(db.Boolean, nullable=False)
     receive_emails = db.Column(db.Boolean, nullable=True, default='False')
+    status = db.Column(db.String(20), nullable=False, default='normal', server_default='normal')
+    is_admin = db.Column(db.Boolean, nullable=False, default=False, server_default='0')
 
 
 # 공지사항 - FAQ
@@ -74,10 +76,14 @@ class Order(db.Model):
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
-    payment_key = db.Column(db.String(200))
-    status = db.Column(db.String(20))  # SUCCESS / FAIL
-    paid_at = db.Column(db.DateTime)
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
+    payment_key = db.Column(db.String(200), unique=True)
+    order_code = db.Column(db.String(100)) # 주문 코드 (조회/로그용)
+    method = db.Column(db.String(50))
+    amount = db.Column(db.Integer)
+    status = db.Column(db.String(20)) # READY / SUCCESS / FAIL
+    requested_at = db.Column(db.DateTime, default=db.func.now())
+    approved_at = db.Column(db.DateTime)
 
     order = db.relationship('Order')
 
@@ -187,11 +193,10 @@ class Reservation(db.Model):
 # 1대1 문의 - review __공자사항
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(100), nullable=False)
-    info = db.Column(db.String(200), nullable=False)
+    cs_ask = db.Column(db.String(50), nullable=False)
+    cs_place = db.Column(db.String(50), nullable=False)
+    subject = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text(), nullable=False)
-    image_path = db.Column(db.Text(), nullable=True)
-    create_date = db.Column(db.DateTime(), nullable=False)
-    # user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    # user = db.relationship('User', backref=db.backref('answer_set'))
-    # modify_date = db.Column(db.DateTime(), nullable=True)
+    image_path = db.Column(db.Text())
+
+
