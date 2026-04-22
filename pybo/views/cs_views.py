@@ -9,8 +9,9 @@ from werkzeug.utils import secure_filename
 from pybo.models import Faq, Review, Notice, User
 from pybo import db
 from pybo.forms import NoticeForm, ReviewForm
+from pybo.views.auth_views import login_required
 
-from views.auth_views import login_required
+
 
 bp = Blueprint('cs', __name__, url_prefix='/cs')
 
