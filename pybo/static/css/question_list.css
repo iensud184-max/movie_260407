@@ -4,7 +4,8 @@
 /* 헤더 */
 .header .container {
     display: flex;
-    justify-content: center;    
+    justify-content: center;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 .header .container .menu{
     width: 1206px; height: 276px;
@@ -60,6 +61,7 @@
     width: 1207px; height: auto;
     min-height: 1200px;
     padding-left: 0;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     background-color: #eaeaea;
     align-items: center;
     margin-bottom: 145px;
