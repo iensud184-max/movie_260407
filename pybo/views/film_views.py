@@ -1,9 +1,10 @@
 from datetime import datetime
+import uuid
 
 from flask import Blueprint, flash, jsonify, render_template, request, abort, jsonify, session, redirect, url_for
 from pybo import db
-from pybo.views.auth_views import login_required
-from pybo.models import Movie, Schedule, Screen, Theater, User, Reservation, Order
+from pybo.views.auth_views import login_required, g
+from pybo.models import Movie, Schedule, Screen, Theater, User, Reservation, Order, imgs
 
 from sqlalchemy import func
 import requests, base64
@@ -30,9 +31,49 @@ def mypage():
         orders=orders
     )
 
-@bp.route('/event', methods=['GET'])
+@bp.route('/event')
 def event():
-    return render_template('event.html')
+    event_images = imgs.query.filter_by(img_type='event').all()
+    event_1 = imgs.query.filter_by(img_name='이벤트1').first()
+    event_2 = imgs.query.filter_by(img_name='이벤트2').first()
+    event_3 = imgs.query.filter_by(img_name='이벤트3').first()
+    event_4 = imgs.query.filter_by(img_name='이벤트4').first()
+    event_5 = imgs.query.filter_by(img_name='이벤트5').first()
+    event_6 = imgs.query.filter_by(img_name='이벤트6').first()
+    event_7 = imgs.query.filter_by(img_name='이벤트7').first()
+    event_8 = imgs.query.filter_by(img_name='이벤트8').first()
+    event_9 = imgs.query.filter_by(img_name='이벤트9').first()
+    event_10 = imgs.query.filter_by(img_name='이벤트10').first()
+    event_11 = imgs.query.filter_by(img_name='이벤트11').first()
+    event_12 = imgs.query.filter_by(img_name='이벤트12').first()
+
+    return render_template(
+        'event.html', 
+        images=event_images,
+        event_1=event_1,
+        event_2=event_2,
+        event_3=event_3,
+        event_4=event_4,
+        event_5=event_5,
+        event_6=event_6,
+        event_7=event_7,
+        event_8=event_8,
+        event_9=event_9,
+        event_10=event_10,
+        event_11=event_11,
+        event_12=event_12
+    )
+
+@bp.route('/event/<string:img_name>')
+def event_detail(img_name):
+    # img = imgs.query.filter_by(img_type='event').all()
+    event_img = imgs.query.filter_by(img_name=img_name).first()
+
+    return render_template(
+        'event_main.html',
+        images=event_img
+
+    )
 
 @bp.route('/movie/list', methods=['GET'])
 def movie_list():
@@ -153,24 +194,18 @@ def movie_payment():
 
     if request.method == 'POST':
         data = request.get_json()
-
-        # 세션에 저장 (핵심)
         session['payment_data'] = data
-
         return jsonify({"success": True})
 
-    # GET 요청 (페이지 이동)
+    
     schedule_id = request.args.get('schedule_id', type=int)
-
     schedule = Schedule.query.get_or_404(schedule_id)
 
     movie = schedule.movie
     screen = schedule.screen
     theater = screen.theater
 
-    # 세션에서 데이터 꺼내기
     payment_data = session.get('payment_data')
-
     if not payment_data:
         abort(400)
 
@@ -179,6 +214,19 @@ def movie_payment():
     total_price = payment_data.get('total_price')
 
     num_people = sum(people.values())
+
+    
+    order_code = str(uuid.uuid4())
+
+    order = Order(
+        order_code=order_code,
+        user_id=g.user.id,
+        total_price=total_price,
+        status='pending'
+    )
+
+    db.session.add(order)
+    db.session.commit()
 
     return render_template(
         'movie_payment.html',
@@ -189,5 +237,19 @@ def movie_payment():
         seats=seats,
         people=people,
         num_people=num_people,
-        total_price=total_price
+        total_price=total_price,
+        order=order
     )
+
+@bp.route('/payment/success')
+def payment_success():
+    order_id = request.args.get("order_id")
+
+    order = Order.query.filter_by(order_code=order_id).first()
+
+    # ✅ 여기서 결제 검증 + 상태 변경
+    order.status = "paid"
+
+    db.session.commit()
+
+    return render_template("payment_success.html", order=order)
