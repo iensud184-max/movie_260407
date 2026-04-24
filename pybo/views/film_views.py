@@ -12,6 +12,8 @@ from collections import defaultdict
 
 bp = Blueprint('film', __name__, url_prefix='/film')
 
+
+
 # 마이페이지
 @bp.route('/mypage', methods=['GET'])
 def mypage():
@@ -21,6 +23,8 @@ def mypage():
         return redirect(url_for('auth.login'))
 
     user = User.query.get(user_id)
+
+    from collections import defaultdict
 
     # 현재 예매 내역
     active = Reservation.query.filter_by(
@@ -47,101 +51,64 @@ def mypage():
             "seats": ", ".join(seats)
         })
 
-    # 취소 내역
-    @bp.route('/mypage', methods=['GET'])
-    def mypage():
-        user_id = session.get('user_id')
+    # 취소 내역 (통합)
+    cancels = []
 
-        if not user_id:
-            return redirect(url_for('auth.login'))
+    # 예매 취소
+    canceled_reservations = Reservation.query.filter_by(
+        user_id=user.id,
+        status='CANCEL'
+    ).all()
 
-        user = User.query.get(user_id)
+    cancel_group = defaultdict(list)
 
-        from collections import defaultdict
+    for r in canceled_reservations:
+        cancel_group[r.schedule_id].append(r)
 
-        # 현재 예매 내역
-        active = Reservation.query.filter_by(
-            user_id=user.id,
-            status='RESERVED'
-        ).all()
+    for schedule_id, items in cancel_group.items():
+        schedule = items[0].schedule
 
-        grouped = defaultdict(list)
+        cancels.append({
+            "type": "reservation",
+            "movie_title": schedule.movie.title,
+            "cancel_date": items[0].created_at.strftime("%Y-%m-%d %H:%M")
+        })
 
-        for r in active:
-            grouped[r.schedule_id].append(r)
-
-        reservation_list = []
-
-        for schedule_id, items in grouped.items():
-            schedule = items[0].schedule
-            seats = [f"{i.seat.row}{i.seat.col}" for i in items]
-
-            reservation_list.append({
-                "schedule_id": schedule_id,
-                "movie": schedule.movie.title,
-                "theater": schedule.screen.theater.name,
-                "datetime": schedule.start_time,
-                "seats": ", ".join(seats)
-            })
-
-        # 취소 내역 (통합)
-        cancels = []
-
-        # 예매 취소
-        canceled_reservations = Reservation.query.filter_by(
-            user_id=user.id,
-            status='CANCEL'
-        ).all()
-
-        cancel_group = defaultdict(list)
-
-        for r in canceled_reservations:
-            cancel_group[r.schedule_id].append(r)
-
-        for schedule_id, items in cancel_group.items():
-            schedule = items[0].schedule
-
-            cancels.append({
-                "type": "reservation",
-                "movie_title": schedule.movie.title,
-                "cancel_date": items[0].created_at.strftime("%Y-%m-%d %H:%M")
-            })
-
-        # 결제 취소
-        cancel_payments = Payment.query \
-            .join(Order) \
-            .filter(
+    # 결제 취소
+    cancel_payments = Payment.query\
+        .join(Order)\
+        .filter(
             Order.user_id == user.id,
             Payment.status == "CANCELLED"
-        ) \
-            .all()
+        )\
+        .all()
 
-        for p in cancel_payments:
-            cancels.append({
-                "type": "payment",
-                "movie_title": p.order.product_name,
-                "cancel_date": p.approved_at.strftime("%Y-%m-%d %H:%M") if p.approved_at else "-"
-            })
+    for p in cancel_payments:
+        cancels.append({
+            "type": "payment",
+            "movie_title": p.order.product_name,
+            "cancel_date": p.approved_at.strftime("%Y-%m-%d %H:%M") if p.approved_at else "-"
+        })
 
-        # 결제 완료 내역
-        payment = Payment.query \
-            .join(Order) \
-            .filter(
+    # 결제 완료 내역
+    payment = Payment.query\
+        .join(Order)\
+        .filter(
             Order.user_id == user.id,
             Payment.status == "SUCCESS"
-        ) \
-            .all()
+        )\
+        .all()
 
-        orders = Order.query.filter_by(user_id=user.id).all()
+    orders = Order.query.filter_by(user_id=user.id).all()
 
-        return render_template(
-            'mypage.html',
-            user=user,
-            reservations=reservation_list,
-            cancels=cancels,
-            payment=payment,
-            orders=orders
-        )
+    return render_template(
+        'mypage.html',
+        user=user,
+        reservations=reservation_list,
+        cancels=cancels,   
+        payment=payment,
+        orders=orders
+    )
     
 @bp.route('/event')
 def event():
@@ -215,37 +182,7 @@ def booking(movie_id):
 
     if not movie:
         abort(404)
-    # =====================================
-    # 청소년관람불가 영화 성인인증 체크
-    # =====================================
-    cert = (movie.certification or '').strip()
-
-    if cert in ['청소년관람불가', '청소년 관람불가', '청불', '19세', '19']:
-
-        # 이미 인증 완료했는지 체크
-        verified = session.get('adult_verified')
-
-        if not verified:
-
-            today = date.today()
-            birth = g.user.birth
-
-            age = today.year - birth.year
-
-            if (today.month, today.day) < (birth.month, birth.day):
-                age -= 1
-
-            # 미성년자 차단
-            if age < 19:
-                flash('청소년 관람불가 영화는 성인만 예매 가능합니다.')
-                return redirect(url_for('main.index'))
-
-            # 성인인데 인증창 미통과 상태
-            session['next_booking_url'] = request.url
-            return redirect(url_for('film.adult_verify'))
-
-    # =====================================
-
+    
     theaters = Theater.query.all()
 
     # 날짜 리스트 (중복 제거)
@@ -277,32 +214,6 @@ def booking(movie_id):
         selected_date=selected_date
     )
 
-# ===============================
-# 성인 인증 페이지
-# ===============================
-@bp.route('/adult_verify')
-@login_required
-def adult_verify():
-    return render_template('adult_verify.html')
-
-
-# ===============================
-# 성인 인증 완료
-# ===============================
-@bp.route('/booking_pass')
-@login_required
-def booking_pass():
-
-    session['adult_verified'] = True
-
-    flash('성인 인증이 완료되었습니다.')
-
-    return redirect(
-        session.get(
-            'next_booking_url',
-            url_for('main.index')
-        )
-    )
 
 @bp.route('/api/schedules')
 def get_schedules():
@@ -383,7 +294,7 @@ def movie_payment():
 
     if request.method == 'POST':
         data = request.get_json()
-
+        schedule_id = data.get("schedule_id") if data else None
         session['booking_data'] = data 
 
         return jsonify({"success": True})
@@ -527,7 +438,7 @@ def cancel_reservation(schedule_id):
     reservations = Reservation.query.filter_by(
         user_id=user_id,
         schedule_id=schedule_id,
-        status='RESERVED'   # ⭐ 이것도 추가
+        status='RESERVED'   
     ).all()
 
     for r in reservations:
